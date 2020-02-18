@@ -1,32 +1,52 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app id="inspire" class="container">
+    <v-app-bar
+      app
+      color="indigo"
+      dark
+    >
+      <v-toolbar-title class="text-center">Checklist</v-toolbar-title>
+    </v-app-bar>
+
+    <v-content>
+      <v-container fluid>
+        <v-row align="center" justify="center">
+          <v-col class="text-center">
+            <Content />
+          </v-col>
+        </v-row>        
+      </v-container>
+    </v-content>
+
+    
+    <v-footer
+      color="indigo"
+      app
+    >
+      <span class="white--text">&copy; 2019</span>
+    </v-footer>
+  </v-app>
 </template>
 
+<script>
+import Content from '@/views/Content.vue'
+
+  export default {
+    props: {
+      source: String,
+    },
+    components: {
+      Content
+    },
+    data: () => ({
+      // drawer: null,
+    }),
+    
+  }
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
+  #inspire {
+    background-color: lightgray;
+  }
 </style>
