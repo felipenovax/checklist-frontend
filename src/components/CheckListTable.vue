@@ -8,7 +8,7 @@
     class="elevation-1"
   >
     <template v-slot:item.backend="{ item }">
-        <v-chip small label :color="item.backend ? 'green': 'red'" dark>{{ item.backend ? 'Sim' : 'Não' }}</v-chip>
+        <v-chip @click="getItems" small label :color="item.backend ? 'green': 'red'" dark>{{ item.backend ? 'Sim' : 'Não' }}</v-chip>
     </template>
     <template v-slot:item.frontend="{ item }">
         <v-chip small label :color="item.frontend ? 'green': 'red'" dark>{{ item.frontend ? 'Sim' : 'Não' }}</v-chip>
@@ -28,7 +28,7 @@
     </template>
     <template v-slot:top>
       <v-toolbar flat color="white">
-        <v-dialog hide-overlay="true"  v-model="dialog" max-width="1200px">
+        <v-dialog v-model="dialog" max-width="1200px">
           <v-card>
             <v-card-title>
               <span class="headline">{{ formTitle }}</span>
@@ -52,7 +52,7 @@
                 <v-tabs-items v-model="tab">
                   <v-tab-item>
                     <v-card flat class="container">
-                      <v-row align-content-sm dense no-gutters>
+                      <v-row dense no-gutters>
                           <v-col class="pt-0 ma-0"  cols="12" sm="6" v-for="(item,index) in defaultList" :key="index">
                             <v-checkbox class="pt-0 ma-0" :label="item.text"></v-checkbox>
                           </v-col>
@@ -62,25 +62,25 @@
 
                   <v-tab-item>
                     <v-card class="container" flat> 
-                      <v-row align-content-sm dense no-gutters>    
+                      <v-row dense no-gutters>    
                         <v-col style="background-color: #f0f0f0" cols="12" sm="4" class="pt-0 ma-0">
                           <div class="d-block pa-2 deep-purple accent-4 white--text">Backend</div>
-                          <v-col class="pt-0 ma-0"  v-for="(item,index) in backendList" :key="index" cols="12" sm="12">
-                            <v-checkbox class="pt-0 ma-0" :label="item.text"></v-checkbox>
+                          <v-col class="pt-0 ma-0"  v-for="(value,name, index) in editedItem.backendList" :key="index" cols="12" sm="12">
+                            <v-checkbox  class="pt-0 ma-0" :label="name" :disabled="!editedItem.backend"></v-checkbox>
                           </v-col>
                         </v-col>    
 
                         <v-col cols="12" sm="4" class="pt-0 ma-0">
                           <div class="d-block pa-2 deep-purple accent-4 white--text">Frontend</div>
-                          <v-col class="pt-0 ma-0"  v-for="(item,index) in frontendList" :key="index" cols="12" sm="12">
-                            <v-checkbox class="pt-0 ma-0" :label="item.text"></v-checkbox>
+                          <v-col class="pt-0 ma-0"  v-for="(value,name, index) in editedItem.frontendList" :key="index" cols="12" sm="12">
+                            <v-checkbox class="pt-0 ma-0" :label="name" :disabled="!editedItem.frontend"></v-checkbox>
                           </v-col>
                         </v-col> 
 
                         <v-col style="background-color: #f0f0f0" cols="12" sm="4" class="pt-0 ma-0">
                           <div class="d-block pa-2 deep-purple accent-4 white--text">Database</div>
-                          <v-col class="pt-0 ma-0"  v-for="(item,index) in databaseList" :key="index" cols="12" sm="12">
-                            <v-checkbox class="pt-0 ma-0" :label="item.text"></v-checkbox>
+                          <v-col class="pt-0 ma-0"  v-for="(value,name, index) in editedItem.databaseList" :key="index" cols="12" sm="12">
+                            <v-checkbox class="pt-0 ma-0" :label="name" :disabled="!editedItem.database"></v-checkbox>
                           </v-col>
                         </v-col>  
                       </v-row>
@@ -124,6 +124,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
   export default {
     data: () => ({
       dialog: false,
@@ -169,22 +171,22 @@
         { text: 'Documentou a historia/feature no confluence ?', value: 'storieDoc'},
       ],
       stories: [
-        {
-            taskNumber: 'PSCAI-38',
-            description: 'provident explicabo commodi impedit placeat ducimus, fuga asperiores debitis optio iste illo?',
-            backend: true,
-            frontend: false,
-            database: true,
-            valueFinished: '75'
-        },
-        {
-            taskNumber: 'PSCAI-1',
-            description: 'provident explicabo commodi impedit placeat ducimus, fuga asperiores debitis optio iste illo?',
-            backend: false,
-            frontend: true,
-            database: false,
-            valueFinished: '49'
-        }
+        // {
+        //     taskNumber: 'PSCAI-38',
+        //     description: 'provident explicabo commodi impedit placeat ducimus, fuga asperiores debitis optio iste illo?',
+        //     backend: true,
+        //     frontend: false,
+        //     database: true,
+        //     valueFinished: '75'
+        // },
+        // {
+        //     taskNumber: 'PSCAI-1',
+        //     description: 'provident explicabo commodi impedit placeat ducimus, fuga asperiores debitis optio iste illo?',
+        //     backend: false,
+        //     frontend: true,
+        //     database: false,
+        //     valueFinished: '49'
+        // }
       ],
       editedIndex: -1,
       editedItem: {
@@ -217,15 +219,37 @@
     },
 
     methods: {
+      async getItems(){
+        await axios
+          .get(`http://localhost:3003/api/checklists/`)
+          .then(res =>{
+            this.stories = res.data
+            this.stories.forEach(element => {
+              element.valueFinished = '75'              
+            });
+          })
+      },
+
       editItem (item) {
         this.editedIndex = this.stories.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
+        console.log(this.editedItem)
       },
 
-      deleteItem (item) {
-        const index = this.stories.indexOf(item)
-        confirm('Tem certeza que deseja deletar este item?') && this.stories.splice(index, 1)
+      async deleteItem (item) {
+        const index = 'id:'+this.stories.indexOf(item)
+        confirm('Tem certeza que deseja deletar este item?') && 
+        (await axios
+          .delete(`http://localhost:3003/api/checklists/`,index)
+          .then( res =>{
+            res ? this.getItems() : ''
+          })
+          .catch(error => {
+            console.log(error)
+          })
+        )
+        // confirm('Tem certeza que deseja deletar este item?') && this.stories.splice(index, 1)
       },
 
       close () {
@@ -245,6 +269,9 @@
         this.close()
       },
     },
+    mounted() {
+      this.getItems()
+    }
   }
 </script>
 

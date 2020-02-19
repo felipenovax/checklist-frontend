@@ -11,6 +11,7 @@
             :rules="taskRules"
             :counter="10"
             label="Task"
+            hint="Exemplo: PSCAI-99"
             required
           ></v-text-field>
         </v-col>
@@ -21,7 +22,7 @@
         >
           <v-text-field
             v-model="formObject.description"
-            :rules="formObject.descriptionRules"
+            :rules="descriptionRules"
             :counter="999"
             label="Descrição"
             required
@@ -33,7 +34,7 @@
                     <v-checkbox
                     v-on="on"
                     v-model="formObject.backend"
-                    label="BE"
+                    label="Backend"
                     ></v-checkbox>
             </template>
             <span>Backend</span>
@@ -46,7 +47,7 @@
             <v-checkbox
                v-on="on"
                v-model="formObject.frontend"
-               label="FE"
+               label="Frontend"
             ></v-checkbox>
           </template>
           <span>Frontend</span>
@@ -59,7 +60,7 @@
                 <v-checkbox
                 v-on="on"
                 v-model="formObject.database"
-                label="DB"
+                label="Database"
                 ></v-checkbox>
             </template>
             <span>Database</span>
@@ -95,7 +96,14 @@ import Axios from 'axios'
           database: false,
           taskNumber: '',
           description: '',
-      },    
+      },   
+      initialValues: {
+        backend: false,
+        frontend: false,
+        database: false,
+        taskNumber: '',
+        description: '',
+      }, 
       taskRules: [
         v => !!v || 'O Numero é obrigatorio'
       ],
@@ -105,44 +113,20 @@ import Axios from 'axios'
     }),
     methods: {
         saveForm() {
-            console.log(this.formObject)
-            Axios
-                .post(`http://localhost:3009/checklist/`, this.formObject)
-                .then(response => {
-                    response ? this.clearForm() : ''
+               Axios
+                .post(`http://localhost:3003/api/checklists/`, this.formObject)
+                .then(async response => {
+                  await response ? this.clearForm() : ''
+                    this.clearForm()
                 })
                 .catch( (err)=>{
-                    console.log(err)
+                  console.log(err)
                 })
             
+             
         },
         clearForm(){
-
-            for(let value in this.formObject) {
-                console.log(typeof value)
-                console.log(value)
-            switch (typeof this.formObject[value]) {
-            case 'string':
-                this.formObject[value] = '';
-                break;
-            case 'number':
-                this.formObject[value] = 0
-                break;
-            case 'boolean':
-                this.object[value] = false
-                break;
-            case 'object':
-                  Array.isArray(this.formObject[value]) ? this.formObject[value] = [] : this.formObject[value] = {}
-                break;
-            default:
-
-        }
-    }
-                // this.formObject.frontend = false;
-                // this.formObject.backend = false;
-                // this.formObject.database = false;
-                // this.formObject.taskNumber = '';
-                // this.formObject.description = '';                
+            this.formObject = this.initialValues         
         }
     },
     mounted: function () {
