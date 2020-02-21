@@ -5,7 +5,7 @@
       color="indigo"
       dark
     >
-      <v-toolbar-title class="text-center">Checklist</v-toolbar-title>
+      <v-toolbar-title class="text-center">Checklist Cairo</v-toolbar-title>
     </v-app-bar>
 
     <v-content>

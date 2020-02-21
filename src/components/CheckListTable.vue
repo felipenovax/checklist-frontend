@@ -8,17 +8,17 @@
     class="elevation-1"
   >
     <template v-slot:item.backend="{ item }">
-        <v-chip @click="getItems" small label :color="item.backend ? 'green': 'red'" dark>{{ item.backend ? 'Sim' : 'Não' }}</v-chip>
+        <v-chip @click="changeChip(item,'backend')" small label :color="item.backend ? 'green': 'red'" dark>{{ item.backend ? 'Sim' : 'Não' }}</v-chip>
     </template>
     <template v-slot:item.frontend="{ item }">
-        <v-chip small label :color="item.frontend ? 'green': 'red'" dark>{{ item.frontend ? 'Sim' : 'Não' }}</v-chip>
+        <v-chip @click="changeChip(item,'frontend')" small label :color="item.frontend ? 'green': 'red'" dark>{{ item.frontend ? 'Sim' : 'Não' }}</v-chip>
     </template>
     <template v-slot:item.database="{ item }">
-        <v-chip small label :color="item.database ? 'green': 'red'" dark>{{ item.database ? 'Sim' : 'Não' }}</v-chip>
+        <v-chip @click="changeChip(item, 'database')" small label :color="item.database ? 'green': 'red'" dark>{{ item.database ? 'Sim' : 'Não' }}</v-chip>
     </template>
     <template v-slot:item.valueFinished="{ item }">
       <v-progress-linear
-      :color="item.valueFinished < 75 ? 'red' : 'light-green'"
+      :color="item.valueFinished <= 45 ? 'red' : (item.valueFinished < 75) ? 'orange' : 'green' "
       height="20"
       :value="item.valueFinished"
       striped
@@ -52,6 +52,7 @@
                 <v-tabs-items v-model="tab">
                   <v-tab-item>
                     <v-card flat class="container">
+                        <div class="d-block pa-2 deep-purple accent-4 white--text">Lista padrão</div>
                       <v-row dense no-gutters>
                           <v-col class="pt-0 ma-0"  cols="12" sm="6" v-for="(item,index) in defaultList" :key="index">
                             <v-checkbox class="pt-0 ma-0" :label="item.text"></v-checkbox>
@@ -59,33 +60,72 @@
                       </v-row>
                     </v-card>
                   </v-tab-item>
-
+                  
                   <v-tab-item>
                     <v-card class="container" flat> 
                       <v-row dense no-gutters>    
                         <v-col style="background-color: #f0f0f0" cols="12" sm="4" class="pt-0 ma-0">
                           <div class="d-block pa-2 deep-purple accent-4 white--text">Backend</div>
-                          <v-col class="pt-0 ma-0"  v-for="(value,name, index) in editedItem.backendList" :key="index" cols="12" sm="12">
-                            <v-checkbox  class="pt-0 ma-0" :label="name" :disabled="!editedItem.backend"></v-checkbox>
-                          </v-col>
+
+                            <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.backendList.buildCreated"
+                              label="O build foi realizado com sucesso?"
+                              :disabled="!editedItem.backend"></v-checkbox>
+                            </v-col> 
+                            
+                            <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.backendList.stressTest"
+                              label="Fez testes de Stress nas Apis?"
+                              :disabled="!editedItem.backend"></v-checkbox>
+                            </v-col> 
+
+                            <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.backendList.sameBase"
+                              label="A base QA e Prod está igual?"
+                              :disabled="!editedItem.backend"></v-checkbox>
+                            </v-col> 
                         </v-col>    
 
                         <v-col cols="12" sm="4" class="pt-0 ma-0">
-                          <div class="d-block pa-2 deep-purple accent-4 white--text">Frontend</div>
-                          <v-col class="pt-0 ma-0"  v-for="(value,name, index) in editedItem.frontendList" :key="index" cols="12" sm="12">
-                            <v-checkbox class="pt-0 ma-0" :label="name" :disabled="!editedItem.frontend"></v-checkbox>
-                          </v-col>
+                          <div class="d-block pa-2 deep-purple accent-4 white--text">Frontend</div>                                                  
+                        
+                        <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.frontendList.snapshotUpdated"
+                              label="Atualizou snapshot do teste unitarios?"
+                              :disabled="!editedItem.frontend"></v-checkbox>
+                            </v-col> 
+                            
+                            <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.frontendList.lintValid"
+                              label="O teste de lint foi executado?"
+                              :disabled="!editedItem.frontend"></v-checkbox>
+                            </v-col> 
+
+                            <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.frontendList.invision"
+                              label="Validou se as telas estão de acordo com Invision?"
+                              :disabled="!editedItem.frontend"></v-checkbox>
+                            </v-col> 
+                        
                         </v-col> 
 
                         <v-col style="background-color: #f0f0f0" cols="12" sm="4" class="pt-0 ma-0">
                           <div class="d-block pa-2 deep-purple accent-4 white--text">Database</div>
-                          <v-col class="pt-0 ma-0"  v-for="(value,name, index) in editedItem.databaseList" :key="index" cols="12" sm="12">
-                            <v-checkbox class="pt-0 ma-0" :label="name" :disabled="!editedItem.database"></v-checkbox>
-                          </v-col>
+                          <v-col class="pt-0 ma-0" cols="12" sm="12">
+                              <v-checkbox
+                              v-model="editedItem.databaseList.adValid"
+                              label="Já validou com AD?"
+                              :disabled="!editedItem.database"></v-checkbox>
+                            </v-col>
                         </v-col>  
                       </v-row>
 
-                      
                     </v-card>
                   </v-tab-item>
                   </v-tabs-items>
@@ -120,6 +160,21 @@
     </template>
   </v-data-table>
 </template>
+<v-snackbar
+        v-model="snackbar"
+        :timeout="timeout"
+        top
+        right
+      >
+        {{ text }}
+        <v-btn
+          color="blue"
+          text
+          @click="snackbar = false"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+    </v-snackbar>
 </div>
 </template>
 
@@ -130,6 +185,11 @@ import axios from 'axios'
     data: () => ({
       dialog: false,
       tab: null,
+      snackbar: false,
+      text: '',
+      timeout: 2000,
+      numero: 0,
+      numero2: '',
       headers: [
         {
           text: 'Número Task',
@@ -144,19 +204,6 @@ import axios from 'axios'
         { text: '%Conclusão', value: 'valueFinished', align: 'center' },
         { text: 'Ações', value: 'action', sortable: false },
       ],
-      backendList: [
-        { text: 'O build foi realizado com sucesso?', value: 'buildCreated' },
-        { text: 'Fez testes de Stress nas Apis?', value: 'stressTest' },
-        { text: 'A base QA e Prod está igual?', value: 'sameBase' }
-      ],
-      frontendList: [
-        { text: 'Atualizou snapshot do teste unitarios?', value: 'snapshotUpdated' },
-        { text: 'O teste de lint foi executado?', value: 'lintValid' },
-        { text: 'Validou se as telas estão de acordo com Invision?', value: 'invision' }
-      ],
-      databaseList: [
-        { text: 'Já validou com AD?', value: 'adValid'}
-      ],
       defaultList: [
         { text: 'A PO aprovou a atividade na review ?', value: 'poApproves'},
         { text: 'Há TimeBox para deploy?', value: 'hasTimebox'},
@@ -170,24 +217,7 @@ import axios from 'axios'
         { text: 'Existe dependência pra deploy?', value: 'hasDeploy'},
         { text: 'Documentou a historia/feature no confluence ?', value: 'storieDoc'},
       ],
-      stories: [
-        // {
-        //     taskNumber: 'PSCAI-38',
-        //     description: 'provident explicabo commodi impedit placeat ducimus, fuga asperiores debitis optio iste illo?',
-        //     backend: true,
-        //     frontend: false,
-        //     database: true,
-        //     valueFinished: '75'
-        // },
-        // {
-        //     taskNumber: 'PSCAI-1',
-        //     description: 'provident explicabo commodi impedit placeat ducimus, fuga asperiores debitis optio iste illo?',
-        //     backend: false,
-        //     frontend: true,
-        //     database: false,
-        //     valueFinished: '49'
-        // }
-      ],
+      stories: [],
       editedIndex: -1,
       editedItem: {
         taskNumber: '',
@@ -196,14 +226,20 @@ import axios from 'axios'
         frontend: false,
         database: false,
         valueFinished: 0,
-      },
-      defaultItem: {
-        taskNumber: '',
-        description: '',
-        backend: false,
-        frontend: false,
-        valueFinished: 0,
-      },
+        backendList: {
+          sameBase: false,
+          stressTest: false,
+          buildCreated: false
+        },
+        databaseList: {
+          adValid: false
+        },
+        frontendList: {
+          snapshotUpdated: false,
+          lintValid: false,
+          invision: false
+        },        
+      }
     }),
 
     computed: {
@@ -219,11 +255,39 @@ import axios from 'axios'
     },
 
     methods: {
+       async changeChip(item, value){
+
+        switch(value){
+          case 'backend':
+            item.backend = !item.backend
+          break;
+
+          case 'frontend':
+            item.frontend = !item.frontend
+          break;
+
+          case 'database':
+            item.database = !item.database
+          break;
+        }
+        await axios
+          .put(`http://localhost:3003/api/checklists/${item._id}`, item)
+          .then( () => {
+            this.text = "Atualizado banco de dados"
+            this.snackbar = true;
+            this.getItems()
+          })
+          .catch(error =>{
+            console.log(error)
+          })
+      },
+
       async getItems(){
         await axios
           .get(`http://localhost:3003/api/checklists/`)
           .then(res =>{
             this.stories = res.data
+            console.log(res.data)
             this.stories.forEach(element => {
               element.valueFinished = '75'              
             });
@@ -254,18 +318,21 @@ import axios from 'axios'
 
       close () {
         this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
       },
 
-      save () {
-        if (this.editedIndex > -1) {
-          Object.assign(this.stories[this.editedIndex], this.editedItem)
-        } else {
-          this.stories.push(this.editedItem)
-        }
+      async save () {
+        console.log(this.editedItem)
+
+           await axios
+          .put(`http://localhost:3003/api/checklists/${this.editedItem._id}`, this.editedItem)
+          .then( () => {
+            this.text = "Atualizado banco de dados"
+            this.snackbar = true;
+            this.getItems()
+          })
+          .catch(error =>{
+            console.log(error)
+          })
         this.close()
       },
     },
