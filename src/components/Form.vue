@@ -9,9 +9,9 @@
           <v-text-field
             v-model="formObject.taskNumber"
             :counter="10"
-            label="Task"
-            hint="Exemplo: PSCAI-99"
+            prefix="PSCAI-"
             required
+            number
           ></v-text-field>
         </v-col>
 
@@ -32,7 +32,7 @@
                     <v-checkbox
                     v-on="on"
                     v-model="formObject.backend"
-                    label="Backend"
+                    label="BE"
                     ></v-checkbox>
             </template>
             <span>Backend</span>
@@ -45,7 +45,7 @@
             <v-checkbox
                v-on="on"
                v-model="formObject.frontend"
-               label="Frontend"
+               label="FE"
             ></v-checkbox>
           </template>
           <span>Frontend</span>
@@ -58,7 +58,7 @@
                 <v-checkbox
                 v-on="on"
                 v-model="formObject.database"
-                label="Database"
+                label="DB"
                 ></v-checkbox>
             </template>
             <span>Database</span>
@@ -81,12 +81,13 @@
     <v-snackbar
         v-model="snackbar"
         :timeout="timeout"
+        :color="snackbarColor"
         top
         right
       >
         {{ text }}
         <v-btn
-          color="blue"
+          color="white"
           text
           @click="snackbar = false"
         >
@@ -104,8 +105,9 @@ import Axios from 'axios'
     data: () => ({
       valid: false,
       snackbar: false,
+      snackbarColor: 'success',
       text: '',
-      timeout: 3000,
+      timeout: 4000,
       formObject: {
           backend: false,
           frontend: false,
@@ -120,12 +122,6 @@ import Axios from 'axios'
         taskNumber: '',
         description: '',
       }, 
-      // taskRules: [
-      //   v => !!v || 'Numero da Task Obrigatorio'
-      // ],
-      // descriptionRules: [
-      //   v => !!v || 'Descrição obrigatória'
-      // ],
     }),
     methods: {
         saveForm() {
@@ -139,6 +135,7 @@ import Axios from 'axios'
               }
 
               else{
+              this.formObject.taskNumber = `PSCAI-${this.formObject.taskNumber}`
                Axios
                 .post(`http://localhost:3003/api/checklists/`, this.formObject)
                 .then(async response => {
@@ -148,7 +145,13 @@ import Axios from 'axios'
                     this.snackbar = true;
                 })
                 .catch( (err)=>{
-                  console.log(err)
+                  if(err.response.data.code === 11000){
+                    this.text = "ERRO: História já havia sido cadastrada"
+                    this.snackbarColor = 'error'
+                    this.snackbar = true;
+                  }
+                  
+                  this.formObject.taskNumber = this.formObject.taskNumber.substring(6,this.formObject.taskNumber.length)
                 })
             }             
         },

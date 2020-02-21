@@ -53,9 +53,39 @@
                   <v-tab-item>
                     <v-card flat class="container">
                         <div class="d-block pa-2 deep-purple accent-4 white--text">Lista padrão</div>
-                      <v-row dense no-gutters>
-                          <v-col class="pt-0 ma-0"  cols="12" sm="6" v-for="(item,index) in defaultList" :key="index">
-                            <v-checkbox class="pt-0 ma-0" :label="item.text"></v-checkbox>
+                      <v-row class="mt-4" dense no-gutters>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="A PO aprovou a atividade na review ?" v-model="editedItem.defaultList.poApproves"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="Há TimeBox para deploy?" v-model="editedItem.defaultList.hasTimebox"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="Consegue validar em prod a historia?" v-model="editedItem.defaultList.storieValid"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="A historia foi validada pelo QA?" v-model="editedItem.defaultList.storieQAValid"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="A atividade atende o escopo solicitado?" v-model="editedItem.defaultList.scopeApproves"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="Todas as alterações foram validadas com a PO?" v-model="editedItem.defaultList.updatePoApproves"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="Foi considerado os requisitos de segurança?" v-model="editedItem.defaultList.securityCheck"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="É necessário alguém externo a equipe acompanhar o deploy?" v-model="editedItem.defaultList.externalApproves"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="O processo de rollback foi verificado?" v-model="editedItem.defaultList.rollbackVerify"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="Existe dependência pra deploy?" v-model="editedItem.defaultList.hasDeploy"></v-checkbox>
+                          </v-col>
+                          <v-col class="pt-0 ma-0"  cols="12" sm="6">
+                            <v-checkbox class="pt-0 ma-0" label="Documentou a historia/feature no confluence ?" v-model="editedItem.defaultList.storieDoc"></v-checkbox>
                           </v-col>
                       </v-row>
                     </v-card>
@@ -165,10 +195,11 @@
         :timeout="timeout"
         top
         right
+        :color="snackbarColor"
       >
         {{ text }}
         <v-btn
-          color="blue"
+          color="white"
           text
           @click="snackbar = false"
         >
@@ -187,7 +218,8 @@ import axios from 'axios'
       tab: null,
       snackbar: false,
       text: '',
-      timeout: 2000,
+      snackbarColor: 'success',
+      timeout: 4000,
       numero: 0,
       numero2: '',
       headers: [
@@ -238,7 +270,20 @@ import axios from 'axios'
           snapshotUpdated: false,
           lintValid: false,
           invision: false
-        },        
+        },  
+        defaultList: {
+          poApproves: false,
+          hasTimebox: false,
+          storieValid: false,
+          storieQAValid: false,
+          scopeApproves: false,
+          updatePoApproves: false,
+          securityCheck: false,
+          externalApproves: false,
+          rollbackVerify: false,
+          hasDeploy: false,
+          storieDoc: false
+        }      
       }
     }),
 
@@ -278,6 +323,9 @@ import axios from 'axios'
             this.getItems()
           })
           .catch(error =>{
+            this.text = "Houve um erro ao atualizar banco de dados"
+            this.snackbarColor = "error"
+            this.snackbar = true;
             console.log(error)
           })
       },
@@ -307,13 +355,17 @@ import axios from 'axios'
         (await axios
           .delete(`http://localhost:3003/api/checklists/`,index)
           .then( res =>{
+            this.text = "História deletada com sucesso"
+            this.snackbar = true;
             res ? this.getItems() : ''
           })
           .catch(error => {
+            this.text = "Houve um erro ao atualizar banco de dados"
+            this.snackbarColor = "error"
+            this.snackbar = true;
             console.log(error)
           })
         )
-        // confirm('Tem certeza que deseja deletar este item?') && this.stories.splice(index, 1)
       },
 
       close () {
