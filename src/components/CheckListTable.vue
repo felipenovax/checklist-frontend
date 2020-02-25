@@ -23,7 +23,7 @@
       :value="item.valueFinished"
       striped
     >
-        <strong style="color: black">{{ item.valueFinished }}%</strong>
+        <strong style="color: black">{{ item.valueFinished.toFixed(2) }}%</strong>
     </v-progress-linear>
     </template>
     <template v-slot:top>
@@ -335,9 +335,34 @@ import axios from 'axios'
           .get(`http://localhost:3003/api/checklists/`)
           .then(res =>{
             this.stories = res.data
-            console.log(res.data)
-            this.stories.forEach(element => {
-              element.valueFinished = '75'              
+            this.stories.forEach(items => {
+              let divisor = 11
+              items.backend ? divisor = divisor + 3 : ''
+              items.frontend ? divisor = divisor + 3 : ''
+              items.database ? divisor = divisor + 1 : ''
+
+              let fraction = (100/divisor); 
+              const target = {}
+              if(items.backend){                
+                const returnedTargetBack = Object.assign(target, items.backendList)
+                let j = Object.values(returnedTargetBack).filter(item => item === true)
+                items.valueFinished = fraction * j.length                
+              }
+              if(items.frontend){
+                const returnedTargetFront = Object.assign(target, items.frontendList)
+                let j = Object.values(returnedTargetFront).filter(item => item === true)
+                items.valueFinished = fraction * j.length
+              }
+              if(items.database){
+                const returnedTargetDatabase = Object.assign(target, items.databaseList)
+                let j = Object.values(returnedTargetDatabase).filter(item => item === true)
+                items.valueFinished = fraction * j.length
+              }
+
+              const returnedTargetDefault = Object.assign(target, items.defaultList)
+                let j = Object.values(returnedTargetDefault).filter(item => item === true)
+                items.valueFinished = fraction * j.length
+
             });
           })
       },
@@ -346,7 +371,6 @@ import axios from 'axios'
         this.editedIndex = this.stories.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
-        console.log(this.editedItem)
       },
 
       async deleteItem (item) {
@@ -373,8 +397,6 @@ import axios from 'axios'
       },
 
       async save () {
-        console.log(this.editedItem)
-
            await axios
           .put(`http://localhost:3003/api/checklists/${this.editedItem._id}`, this.editedItem)
           .then( () => {
