@@ -251,6 +251,7 @@ import axios from 'axios'
       ],
       stories: [],
       editedIndex: -1,
+      baseApiUrl: 'http://localhost:3003',
       editedItem: {
         taskNumber: '',
         description: '',
@@ -316,7 +317,7 @@ import axios from 'axios'
           break;
         }
         await axios
-          .put(`http://localhost:3003/api/checklists/${item._id}`, item)
+          .put(`${this.baseApiUrl}/api/checklists/${item._id}`, item)
           .then( () => {
             this.text = "Atualizado banco de dados"
             this.snackbar = true;
@@ -332,36 +333,36 @@ import axios from 'axios'
 
       async getItems(){
         await axios
-          .get(`http://localhost:3003/api/checklists/`)
+          .get(`${this.baseApiUrl}/api/checklists/`)
           .then(res =>{
             this.stories = res.data
             this.stories.forEach(items => {
-              let divisor = 11
+              let divisor = 11;
+              const target = {};
+
               items.backend ? divisor = divisor + 3 : ''
               items.frontend ? divisor = divisor + 3 : ''
               items.database ? divisor = divisor + 1 : ''
 
               let fraction = (100/divisor); 
-              const target = {}
-              if(items.backend){                
-                const returnedTargetBack = Object.assign(target, items.backendList)
-                let j = Object.values(returnedTargetBack).filter(item => item === true)
-                items.valueFinished = fraction * j.length                
+              
+              let returnedTarget = (target, itemsObject) =>{
+                  let j = Object.assign(target, itemsObject)
+                  j = Object.values(j).filter(item => item === true)
+                  return j
+              }
+              
+              if(items.backend){  
+                items.valueFinished = fraction * (returnedTarget(target, items.backendList).length)               
               }
               if(items.frontend){
-                const returnedTargetFront = Object.assign(target, items.frontendList)
-                let j = Object.values(returnedTargetFront).filter(item => item === true)
-                items.valueFinished = fraction * j.length
+                items.valueFinished = fraction * (returnedTarget(target, items.frontendList).length) 
               }
               if(items.database){
-                const returnedTargetDatabase = Object.assign(target, items.databaseList)
-                let j = Object.values(returnedTargetDatabase).filter(item => item === true)
-                items.valueFinished = fraction * j.length
+                items.valueFinished = fraction * (returnedTarget(target, items.databaseList).length) 
               }
 
-              const returnedTargetDefault = Object.assign(target, items.defaultList)
-                let j = Object.values(returnedTargetDefault).filter(item => item === true)
-                items.valueFinished = fraction * j.length
+              items.valueFinished = fraction * (returnedTarget(target, items.defaultList).length) 
 
             });
           })
@@ -377,7 +378,7 @@ import axios from 'axios'
         const index = 'id:'+this.stories.indexOf(item)
         confirm('Tem certeza que deseja deletar este item?') && 
         (await axios
-          .delete(`http://localhost:3003/api/checklists/`,index)
+          .delete(`${this.baseApiUrl}/api/checklists/`,index)
           .then( res =>{
             this.text = "História deletada com sucesso"
             this.snackbar = true;
@@ -398,7 +399,7 @@ import axios from 'axios'
 
       async save () {
            await axios
-          .put(`http://localhost:3003/api/checklists/${this.editedItem._id}`, this.editedItem)
+          .put(`${this.baseApiUrl}/api/checklists/${this.editedItem._id}`, this.editedItem)
           .then( () => {
             this.text = "Atualizado banco de dados"
             this.snackbar = true;
