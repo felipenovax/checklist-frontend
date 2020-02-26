@@ -104,6 +104,7 @@ import Axios from 'axios'
     name: 'Form',
     data: () => ({
       valid: false,
+      baseApiUrl: 'https://checklist-cairo.herokuapp.com',
       snackbar: false,
       snackbarColor: 'success',
       text: '',
@@ -137,7 +138,7 @@ import Axios from 'axios'
               else{
               this.formObject.taskNumber = `PSCAI-${this.formObject.taskNumber}`
                Axios
-                .post(`http://localhost:3003/api/checklists/`, this.formObject)
+                .post(`${this.baseApiUrl}/api/checklists/`, this.formObject)
                 .then(async response => {
                   await response ? this.clearForm() : ''
                     this.clearForm()

@@ -251,7 +251,7 @@ import axios from 'axios'
       ],
       stories: [],
       editedIndex: -1,
-      baseApiUrl: 'http://localhost:3003',
+      baseApiUrl: 'https://checklist-cairo.herokuapp.com',
       editedItem: {
         taskNumber: '',
         description: '',
@@ -352,19 +352,16 @@ import axios from 'axios'
                   return j
               }
               
-              if(items.backend){  
-                items.valueFinished = fraction * (returnedTarget(target, items.backendList).length)               
-              }
-              if(items.frontend){
-                items.valueFinished = fraction * (returnedTarget(target, items.frontendList).length) 
-              }
-              if(items.database){
-                items.valueFinished = fraction * (returnedTarget(target, items.databaseList).length) 
-              }
+              if(items.backend) items.valueFinished = fraction * (returnedTarget(target, items.backendList).length)
+              if(items.frontend) items.valueFinished = fraction * (returnedTarget(target, items.frontendList).length)
+              if(items.database) items.valueFinished = fraction * (returnedTarget(target, items.databaseList).length)
 
               items.valueFinished = fraction * (returnedTarget(target, items.defaultList).length) 
 
             });
+          })
+          .catch(error =>{
+            console.log(error)
           })
       },
 
