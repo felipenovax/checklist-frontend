@@ -3,7 +3,7 @@
   <template>
   <v-data-table
     :headers="headers"
-    :items="stories"
+    :items="this.$store.state.stories"
     sort-by="calories"
     class="elevation-1"
   >
@@ -290,7 +290,7 @@ import axios from 'axios'
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Editar História'
+        return this.editedIndex === -1 ? 'Novo Item' : 'Editar História'
       },
     },
 
@@ -332,11 +332,12 @@ import axios from 'axios'
       },
 
       async getItems(){
+
         await axios
           .get(`${this.baseApiUrl}/api/checklists/`)
           .then(res =>{
-            this.stories = res.data
-            this.stories.forEach(items => {
+            this.$store.state.stories = res.data
+            this.$store.state.stories.forEach(items => {
               let divisor = 11;
               const target = {};
 
@@ -366,13 +367,13 @@ import axios from 'axios'
       },
 
       editItem (item) {
-        this.editedIndex = this.stories.indexOf(item)
+        this.editedIndex = this.$store.state.stories.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
       async deleteItem (item) {
-        const index = 'id:'+this.stories.indexOf(item)
+        const index = 'id:'+this.$store.state.stories.indexOf(item)
         confirm('Tem certeza que deseja deletar este item?') && 
         (await axios
           .delete(`${this.baseApiUrl}/api/checklists/`,index)

@@ -76,6 +76,7 @@
               <v-btn @click="saveForm" color="green" small dark>Salvar</v-btn>
             </v-col>
           </div>
+          {{ola}}
       </v-row>
     </v-container>
     <v-snackbar
@@ -108,6 +109,7 @@ import Axios from 'axios'
       snackbar: false,
       snackbarColor: 'success',
       text: '',
+      ola: '',
       timeout: 4000,
       formObject: {
           backend: false,
@@ -144,6 +146,8 @@ import Axios from 'axios'
                     this.clearForm()
                     this.text = "Tarefa Cadastrada com sucesso!"
                     this.snackbar = true;
+                    console.log(this.$emit)
+                    this.getItems()
                 })
                 .catch( (err)=>{
                   if(err.response.data.code === 11000){
@@ -158,7 +162,43 @@ import Axios from 'axios'
         },
         clearForm(){
             this.formObject = this.initialValues         
-        }
+        },
+
+
+        async getItems(){
+
+        await Axios
+          .get(`${this.baseApiUrl}/api/checklists/`)
+          .then(res =>{
+            this.$store.state.stories = res.data
+            this.$store.state.stories.forEach(items => {
+              let divisor = 11;
+              const target = {};
+
+              items.backend ? divisor = divisor + 3 : ''
+              items.frontend ? divisor = divisor + 3 : ''
+              items.database ? divisor = divisor + 1 : ''
+
+              let fraction = (100/divisor); 
+              
+              let returnedTarget = (target, itemsObject) =>{
+                  let j = Object.assign(target, itemsObject)
+                  j = Object.values(j).filter(item => item === true)
+                  return j
+              }
+              
+              if(items.backend) items.valueFinished = fraction * (returnedTarget(target, items.backendList).length)
+              if(items.frontend) items.valueFinished = fraction * (returnedTarget(target, items.frontendList).length)
+              if(items.database) items.valueFinished = fraction * (returnedTarget(target, items.databaseList).length)
+
+              items.valueFinished = fraction * (returnedTarget(target, items.defaultList).length) 
+
+            });
+          })
+          .catch(error =>{
+            console.log(error)
+          })
+      },
     },
     mounted: function () {
   this.$nextTick(function () {
